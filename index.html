@@ -41,8 +41,15 @@ function processarArquivos() {
 
             const nNF = getVal("nNF");
             const serie = getVal("serie");
-            const vNF = getVal("vNF");
-            const pesoB = getVal("pesoB");
+
+            // Formata vNF (valor monetário) para padrão brasileiro
+            let vNF = getVal("vNF");
+            vNF = vNF ? parseFloat(vNF).toFixed(2).replace(".", ",") : "";
+
+            // Formata pesoB para duas casas decimais com ponto
+            let pesoB = getVal("pesoB");
+            pesoB = pesoB ? parseFloat(pesoB).toFixed(2) : "";
+
             const qVol = getVal("qVol");
 
             resultados.push([nNF, serie, vNF, pesoB, qVol]);
