@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Extrator de NF-e XML</title>
+<style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    input, button { margin: 10px 0; }
+</style>
+</head>
+<body>
+
+<h2>Extrator de Dados de NF-e (XML)</h2>
+<input type="file" id="xmlFiles" multiple accept=".xml">
+<br>
+<button onclick="processarArquivos()">Processar</button>
+<br>
+<a id="downloadLink" style="display:none;">Baixar CSV</a>
+
+<script>
+function processarArquivos() {
+    const files = document.getElementById("xmlFiles").files;
+    if (!files.length) {
+        alert("Selecione pelo menos um arquivo XML.");
+        return;
+    }
+
+    let resultados = [["nNF", "serie", "vNF", "pesoB", "qVol"]]; // Cabeçalho CSV
+    let lidos = 0;
+
+    Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(e.target.result, "text/xml");
+
+            const getVal = tag => {
+                const el = xmlDoc.getElementsByTagName(tag)[0];
+                return el ? el.textContent : "";
+            };
+
+            const nNF = getVal("nNF");
+            const serie = getVal("serie");
+            const vNF = getVal("vNF");
+            const pesoB = getVal("pesoB");
+            const qVol = getVal("qVol");
+
+            resultados.push([nNF, serie, vNF, pesoB, qVol]);
+            lidos++;
+
+            if (lidos === files.length) {
+                gerarCSV(resultados);
+            }
+        };
+        reader.readAsText(file);
+    });
+}
+
+function gerarCSV(dados) {
+    const csvContent = dados.map(e => e.join(";")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.getElementById("downloadLink");
+    link.href = url;
+    link.download = "nfe_dados.csv";
+    link.style.display = "inline";
+    link.textContent = "Baixar CSV";
+}
+</script>
+
+</body>
+</html>
